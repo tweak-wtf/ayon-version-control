@@ -1200,6 +1200,15 @@ class P4ConnectionManager:
         # returns list as _process_result_ breaks dictionary
         return change_list
 
+    def _connect_get_uncommitted_changes(self):
+        client_spec = self._connect_run_command("client", "-o")[0]
+        cmd = ["changes", "-s", "pending", "-c", client_spec["Client"]]
+        changes = self._connect_run_command(*cmd)
+
+        if default_changes := self._connect_run_command("opened", "-c", "default"):
+            changes.append(default_changes)
+        return changes
+
     def _connect_get_last_change_list(self):
         client_info = self.p4.run("client", "-o")[0]
         client = client_info["Client"]

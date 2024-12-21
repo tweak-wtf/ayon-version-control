@@ -94,6 +94,12 @@ class PerforceRestStub:
         return response
 
     @staticmethod
+    def get_uncommitted_changes():
+        # type: (None) -> dict
+        response = PerforceRestStub._wrap_call("get_uncommitted_changes")
+        return response
+
+    @staticmethod
     def submit_change_list(comment):
         response = PerforceRestStub._wrap_call(
             "submit_change_list", comment=comment)

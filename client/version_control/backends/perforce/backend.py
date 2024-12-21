@@ -100,6 +100,11 @@ class VersionControlPerforce(abstract.VersionControl):
         return api.get_changes(stream=stream)
 
     @staticmethod
+    def get_uncommitted_changes():
+        # type: (None) -> (list(dict)) | None
+        return api.get_uncommitted_changes()
+
+    @staticmethod
     def get_existing_change_list(comment):
         # type: (str) -> dict[str, Any] | None
         return api.get_existing_change_list(comment)

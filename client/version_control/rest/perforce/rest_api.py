@@ -77,6 +77,13 @@ class PerforceModuleRestAPI:
             get_changes.dispatch
         )
 
+        get_uncommitted_changes = rest_routes.GetUncommittedChanges()
+        self.server_manager.add_route(
+            "POST",
+            self.prefix + "/get_uncommitted_changes",
+            get_uncommitted_changes.dispatch
+        )
+
         get_last_change_list = rest_routes.GetLastChangelist()
         self.server_manager.add_route(
             "POST",

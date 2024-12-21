@@ -157,6 +157,19 @@ class GetChanges(PerforceRestApiEndpoint):
             content_type="application/json"
         )
 
+class GetUncommittedChanges(PerforceRestApiEndpoint):
+    """Returns list of uncomitted changes."""
+    async def post(self, request) -> Response:
+        log.debug("GetUncommittedChanges called")
+        content = await request.json()
+
+        result = VersionControlPerforce.get_uncommitted_changes()
+        return Response(
+            status=200,
+            body=self.encode(result),
+            content_type="application/json"
+        )
+
 
 class GetLastChangelist(PerforceRestApiEndpoint):
     """Returns list of dict with project info (id, name)."""
