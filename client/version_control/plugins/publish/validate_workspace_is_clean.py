@@ -1,7 +1,9 @@
+from copy import deepcopy
 import os
+from pathlib import Path
 
 import pyblish.api
-from qtpy import QtWidgets
+from qtpy import QtCore, QtWidgets
 
 from ayon_core.tools.utils import ErrorMessageBox
 from ayon_core.pipeline.publish import (
@@ -11,6 +13,7 @@ from ayon_core.pipeline.publish import (
 )
 
 from version_control.rest.perforce.rest_stub import PerforceRestStub
+
 
 class ValidateWorkspaceIsClean(pyblish.api.InstancePlugin):
     """Validates if local workspace has no uncomitted changes."""
@@ -27,11 +30,20 @@ class ValidateWorkspaceIsClean(pyblish.api.InstancePlugin):
             for change in uncommitted_changes:
                 self.log.error(f"Uncommitted change: {change}")
             instance.data["uncommitted_changes"] = uncommitted_changes
-            raise PublishValidationError("Workspace has uncommitted changes! Please commit or revert before publish.")
+            raise PublishValidationError(
+                "Workspace has uncommitted changes! Please commit or revert before publish."
+            )
         # # TODO: check for stream updates
 
     @classmethod
     def repair(cls, instance):
+        UncommittedChangesRepairer(
+            uncommitted_changes=instance.data["uncommitted_changes"],
+            workspace_dir=instance.context.data["version_control"]["workspace_dir"],
+            workspace_name=instance.context.data["version_control"]["workspace_name"]
+        ).exec_()
+
+
 class ChangesSelectionListModel(QtCore.QAbstractListModel):
     def __init__(self, data, parent=None):
         super().__init__(parent)
@@ -61,14 +73,15 @@ class ChangesSelectionListModel(QtCore.QAbstractListModel):
         return True
 
 class UncommittedChangesRepairer(ErrorMessageBox):
-
     mb_submit_message: QtWidgets.QMessageBox = None
-    lw_uncommitted_changes: QtWidgets.QListWidget = None
+    lv_uncommitted_changes: QtWidgets.QListView = None
 
-    def __init__(self, uncommitted_changes: list):
+    def __init__(self, uncommitted_changes: list, workspace_dir: str, workspace_name: str):
         self.title = "Pending Files in Changelist"
         self.parent = QtWidgets.QApplication.activeWindow()
         self.uncommitted_changes = uncommitted_changes
+        self.workspace_dir = workspace_dir
+        self.workspace_name = workspace_name
         super().__init__(self.title, self.parent)
 
     def _create_content(self, content_layout) -> None:
@@ -103,13 +116,20 @@ class UncommittedChangesRepairer(ErrorMessageBox):
         content_layout.addWidget(btn_submit)
 
     def on_revert_selected(self):
-        if self.lw_uncommitted_changes.selectedItems():
-            for item in self.lw_uncommitted_changes.selectedItems():
-                self.revert(item.text())
-                # remove item from list
-                self.lw_uncommitted_changes.takeItem(self.lw_uncommitted_changes.row(item))
+        selection = self.lv_uncommitted_changes.selectedIndexes()
+        for index in selection:
+            # we need to buil;d an absolute local path
+            # it seems p4 revert doesn't like depot or client syntax?!
+            client_file = deepcopy(index.data(QtCore.Qt.UserRole)["clientFile"])
+            client_file = client_file.replace("//", "")
+            client_file = client_file.replace(str(self.workspace_name), self.workspace_dir)
+            client_file = Path(client_file)
+            file_to_revert = self.workspace_dir / client_file
 
-        if self.lw_uncommitted_changes.count() == 0:
+            PerforceRestStub.revert(path=file_to_revert.as_posix())
+            self.lv_uncommitted_changes.model().removeRow(index.row())
+
+        if self.lv_uncommitted_changes.model().rowCount(QtCore.QModelIndex()) == 0:
             self.accept()
 
     def on_revert(self):
