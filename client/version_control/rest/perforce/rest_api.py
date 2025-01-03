@@ -105,6 +105,13 @@ class PerforceModuleRestAPI:
             submit_change_list.dispatch
         )
 
+        submit_default_changelist = rest_routes.SubmitDefaultChangelist()
+        self.server_manager.add_route(
+            "POST",
+            self.prefix + "/submit_default_changelist",
+            submit_default_changelist.dispatch
+        )
+
         exists_on_server = rest_routes.ExistsOnServer()
         self.server_manager.add_route(
             "POST",

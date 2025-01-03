@@ -142,6 +142,11 @@ class VersionControlPerforce(abstract.VersionControl):
         return api.submit_change_list(comment)
 
     @staticmethod
+    def submit_default_changelist(comment):
+        # type: (str) -> int | None
+        return api.submit_default_changelist(comment)
+
+    @staticmethod
     def update_change_list_description(comment, new_comment):
         # type: (str, str) -> bool
         return api.update_change_list_description(comment, new_comment)

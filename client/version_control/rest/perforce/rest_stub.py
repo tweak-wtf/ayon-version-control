@@ -106,6 +106,12 @@ class PerforceRestStub:
         return response
 
     @staticmethod
+    def submit_default_changelist(comment):
+        response = PerforceRestStub._wrap_call(
+            "submit_default_changelist", comment=comment)
+        return response
+
+    @staticmethod
     def revert(path):
         response = PerforceRestStub._wrap_call(
             "revert", path=path)

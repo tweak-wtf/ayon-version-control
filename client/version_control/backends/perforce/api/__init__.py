@@ -1834,6 +1834,16 @@ class P4ConnectionManager:
 
         return int(result[0]["change"])
 
+    def _connect_submit_default_changelist(self, change_description: str) -> int | None:
+        default_cl_cmd = ["change", "-o"]
+        default_cl = self.p4.run(*default_cl_cmd)[0]
+        default_cl["Description"] = change_description
+        result = self.p4.run_submit(default_cl)
+        if not result:
+            return None
+
+        return int(result[0]["change"])
+
     def _connect_sync(self, path):
         """
         Synonym for get_latest

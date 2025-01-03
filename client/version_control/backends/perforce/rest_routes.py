@@ -199,6 +199,20 @@ class SubmitChangelist(PerforceRestApiEndpoint):
         )
 
 
+class SubmitDefaultChangelist(PerforceRestApiEndpoint):
+    """Returns list of dict with project info (id, name)."""
+    async def post(self, request) -> Response:
+        log.debug("SubmitChangelist called")
+        content = await request.json()
+
+        result = VersionControlPerforce.submit_default_changelist(content["comment"])
+        return Response(
+            status=200,
+            body=self.encode(result),
+            content_type="application/json"
+        )
+
+
 class Revert(PerforceRestApiEndpoint):
     async def post(self, request) -> Response:
         log.debug("Revert called")
