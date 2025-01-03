@@ -133,11 +133,17 @@ class UncommittedChangesRepairer(ErrorMessageBox):
 
     def on_submit(self):
         if self.mb_submit_message.toPlainText() == "":
-            errorbox = GenericErrorBox(
-                "Submit Error", "Please enter a message for the submit"
-            )
-            errorbox.exec_()
+            msg_box = QtWidgets.QMessageBox()
+            msg_box.setIcon(QtWidgets.QMessageBox.Critical)
+            msg_box.setWindowTitle("No commit message found")
+            msg_box.setText("Please enter a message for the submit")
+            msg_box.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            msg_box.setWindowModality(QtCore.Qt.ApplicationModal)
+            msg_box.setWindowFlags(msg_box.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
+            msg_box.exec_()
             return
 
-        # TODO: implement default changelist submission
+        changelist_message = self.mb_submit_message.toPlainText()
+        changelist_message = f"[AYON Publish Submission]\t{changelist_message}"
+        PerforceRestStub.submit_default_changelist(changelist_message)
         self.accept()
