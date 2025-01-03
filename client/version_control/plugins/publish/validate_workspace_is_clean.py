@@ -32,8 +32,33 @@ class ValidateWorkspaceIsClean(pyblish.api.InstancePlugin):
 
     @classmethod
     def repair(cls, instance):
-        UncommittedChangesRepairer(instance.data["uncommitted_changes"]).exec_()
+class ChangesSelectionListModel(QtCore.QAbstractListModel):
+    def __init__(self, data, parent=None):
+        super().__init__(parent)
+        self._data = data
 
+    def rowCount(self, parent):
+        return len(self._data)
+
+    def get_index(self, value):
+        for idx, val in enumerate(self._data):
+            if val == value:
+                return idx
+        return None
+
+    def data(self, index, role):
+        if isinstance(index, QtCore.QModelIndex):
+            index = index.row()
+        if role == QtCore.Qt.DisplayRole:
+            return f"[{self._data[index]['action']}]\t{self._data[index]['clientFile']}"
+        if role == QtCore.Qt.UserRole:
+            return self._data[index]
+
+    def removeRows(self, row, count, parent=QtCore.QModelIndex()):
+        self.beginRemoveRows(parent, row, row + count - 1)
+        del self._data[row:row + count]
+        self.endRemoveRows()
+        return True
 
 class UncommittedChangesRepairer(ErrorMessageBox):
 
@@ -52,15 +77,16 @@ class UncommittedChangesRepairer(ErrorMessageBox):
         )
         content_layout.addWidget(label)
 
-        self.lw_uncommitted_changes = QtWidgets.QListWidget()
-        for change in self.uncommitted_changes:
-            self.lw_uncommitted_changes.addItem(f"[{change['action'].upper()}]\t{change['clientFile']}")
+        self.lv_uncommitted_changes = QtWidgets.QListView()
+        self.lv_uncommitted_changes.setAlternatingRowColors(True)
 
-        # allow multiple selection
-        self.lw_uncommitted_changes.setSelectionMode(
+        self.lv_uncommitted_changes.setModel(
+            ChangesSelectionListModel(self.uncommitted_changes)
+        )
+        self.lv_uncommitted_changes.setSelectionMode(
             QtWidgets.QAbstractItemView.MultiSelection
         )
-        content_layout.addWidget(self.lw_uncommitted_changes)
+        content_layout.addWidget(self.lv_uncommitted_changes)
 
         self.mb_submit_message = QtWidgets.QPlainTextEdit()
         self.mb_submit_message.setPlaceholderText("Enter a message for the submit")
