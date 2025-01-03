@@ -83,6 +83,7 @@ class UncommittedChangesRepairer(ErrorMessageBox):
         self.workspace_dir = workspace_dir
         self.workspace_name = workspace_name
         super().__init__(self.title, self.parent)
+        self.resize(800, 600)
 
     def _create_content(self, content_layout) -> None:
         label = QtWidgets.QLabel(
