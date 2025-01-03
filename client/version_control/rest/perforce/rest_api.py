@@ -70,6 +70,13 @@ class PerforceModuleRestAPI:
             is_checkouted.dispatch
         )
 
+        revert = rest_routes.Revert()
+        self.server_manager.add_route(
+            "POST",
+            self.prefix + "/revert",
+            revert.dispatch
+        )
+
         get_changes = rest_routes.GetChanges()
         self.server_manager.add_route(
             "POST",

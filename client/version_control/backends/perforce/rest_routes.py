@@ -199,6 +199,18 @@ class SubmitChangelist(PerforceRestApiEndpoint):
         )
 
 
+class Revert(PerforceRestApiEndpoint):
+    async def post(self, request) -> Response:
+        log.debug("Revert called")
+        content = await request.json()
+
+        result = VersionControlPerforce.revert(content["path"])
+        return Response(
+            status=200,
+            body=self.encode(result),
+            content_type="application/json"
+        )
+
 class ExistsOnServer(PerforceRestApiEndpoint):
     """Returns information about file on 'path'."""
     async def post(self, request) -> Response:

@@ -106,6 +106,12 @@ class PerforceRestStub:
         return response
 
     @staticmethod
+    def revert(path):
+        response = PerforceRestStub._wrap_call(
+            "revert", path=path)
+        return response
+
+    @staticmethod
     def exists_on_server(path):
         response = PerforceRestStub._wrap_call(
             "exists_on_server", path=path)
