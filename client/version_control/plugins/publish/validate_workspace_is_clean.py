@@ -106,13 +106,10 @@ class UncommittedChangesRepairer(ErrorMessageBox):
 
         content_layout.addWidget(self.mb_submit_message)
         btn_revert_selected = QtWidgets.QPushButton("Revert Selected")
-        btn_revert = QtWidgets.QPushButton("Revert All")
         btn_submit = QtWidgets.QPushButton("Submit")
-        btn_revert.clicked.connect(self.on_revert)
         btn_revert_selected.clicked.connect(self.on_revert_selected)
         btn_submit.clicked.connect(self.on_submit)
         content_layout.addWidget(btn_revert_selected)
-        content_layout.addWidget(btn_revert)
         content_layout.addWidget(btn_submit)
 
     def on_revert_selected(self):
@@ -132,14 +129,6 @@ class UncommittedChangesRepairer(ErrorMessageBox):
         if self.lv_uncommitted_changes.model().rowCount(QtCore.QModelIndex()) == 0:
             self.accept()
 
-    def on_revert(self):
-        self.revert("//...")
-        self.lw_uncommitted_changes.clear()
-        self.accept()
-
-    def revert(self, file):
-        # TODO: implement
-        pass
 
     def on_submit(self):
         if self.mb_submit_message.toPlainText() == "":
