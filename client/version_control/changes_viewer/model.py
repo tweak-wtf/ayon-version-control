@@ -31,6 +31,9 @@ class ChangesModel(QtGui.QStandardItemModel):
         self.removeRows(0, self.rowCount())  # Clear existing data
         changes = self._controller.get_changes()
 
+        if not isinstance(changes, list):
+            changes = [changes]
+
         for change in changes:
             date_time = datetime.fromtimestamp(int(change["time"]))
             date_string = date_time.strftime("%Y%m%dT%H%M%SZ")
