@@ -1211,8 +1211,8 @@ class P4ConnectionManager:
 
     def _connect_get_last_change_list(self):
         client_info = self.p4.run("client", "-o")[0]
-        client = client_info["Client"]
-        cmd = ["changes", "-s", "submitted", "-m", 1, "-c", client]
+        client_stream = client_info["Stream"]
+        cmd = ["changes", "-s", "submitted", "-m", 1, f"{client_stream}/..."]
         change_list = self._connect_run_command(*cmd)
         if not change_list:
             return
