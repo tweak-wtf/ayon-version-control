@@ -144,6 +144,6 @@ class UncommittedChangesRepairer(ErrorMessageBox):
             return
 
         changelist_message = self.mb_submit_message.toPlainText()
-        changelist_message = f"[AYON Publish Submission]\t{changelist_message}"
+        changelist_message = f"[PRE PUBLISH] {changelist_message}"
         PerforceRestStub.submit_default_changelist(changelist_message)
         self.accept()
